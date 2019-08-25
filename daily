@@ -1,0 +1,50 @@
+
+omconfig chassis biossetup attribute=LogicalProc setting=Disabled
+omconfig chassis biossetup attribute=ProcVirtualization setting=Disabled
+
+racdam --nocertwarn  getsysinfo
+
+ 
+systemctl list-unit-files --type service --state enabled,generated
+ 
+
+
+clush -b -w node[40-42] uname -r
+
+dshbak
+
+
+
+Increase the size of the ethernet device RX ring buffer. First, inspect the output of ethtool -g ethX for the maximum size:
+[root@host]# ethtool -g eth0
+ Ring parameters for eth0: 
+ Pre-set maximums: 
+ RX:             4080 
+ RX Mini:        0 
+ RX Jumbo:       16320 
+ TX:             255 
+ Current hardware settings: 
+ RX:             255 
+ RX Mini:        0 
+ RX Jumbo:       0 
+ TX:             255
+
+ If the Pre-set maximums are more than the what is listed in the current hardware settings, it is recommend to increase this number as follows:
+ [root@host]# ethtool -G eth0 rx 4080
+ 
+ 
+ 
+ 
+
+ifcfg-eth0 
+ ## Setting a single option (running ethtool once)
+ETHTOOL_OPTS="-G ${DEVICE} rx 4096"
+
+## Setting multiple options (running ethtool multiple times)
+ETHTOOL_OPTS="-G ${DEVICE} rx 4096; -A ${DEVICE} autoneg on"
+
+
+
+
+
+ yum update initscripts
